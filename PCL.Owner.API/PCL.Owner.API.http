@@ -1,0 +1,6 @@
+@PCL.Owner.API_HostAddress = http://localhost:5093
+
+GET {{PCL.Owner.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

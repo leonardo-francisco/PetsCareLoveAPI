@@ -1,0 +1,6 @@
+@PCL.TrainerManagement.API_HostAddress = http://localhost:5174
+
+GET {{PCL.TrainerManagement.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

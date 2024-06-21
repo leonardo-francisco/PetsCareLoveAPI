@@ -1,0 +1,6 @@
+@PCL.VeterinarianManagement.API_HostAddress = http://localhost:5263
+
+GET {{PCL.VeterinarianManagement.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
