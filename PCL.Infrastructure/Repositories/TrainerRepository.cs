@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using PCL.Domain.Entities;
 using PCL.Domain.Interfaces;
+using PCL.Domain.Utils;
 using PCL.Infrastructure.Persistence;
 using System;
 using System.Collections.Generic;
@@ -13,20 +14,53 @@ namespace PCL.Infrastructure.Repositories
     public class TrainerRepository : ITrainerRepository
     {
         private readonly PetCareContext _context;
+        private readonly ImageHelper _imageHelper;
 
-        public TrainerRepository(PetCareContext context)
+        public TrainerRepository(PetCareContext context, ImageHelper imageHelper)
         {
             _context = context;
+            _imageHelper = imageHelper;
+
         }
 
         public async Task CreateAsync(Trainer trainer)
         {
             await _context.Trainers.InsertOneAsync(trainer);
+
+            if (!string.IsNullOrEmpty(trainer.Photo))
+            {
+                string directoryPath = Path.Combine("wwwroot", "images", "trainer");
+                Directory.CreateDirectory(directoryPath);
+
+                string imagePath = Path.Combine(directoryPath, $"{trainer.Id}.jpg");
+
+                await _imageHelper.DownloadAndSaveImageAsync(trainer.Photo, imagePath);
+
+                // Update the Photo property to the new local path
+                trainer.Photo = $"/images/trainer/{trainer.Id}.jpg";
+                var updateDefinition = Builders<Trainer>.Update.Set(o => o.Photo, trainer.Photo);
+                await _context.Trainers.UpdateOneAsync(o => o.Id == trainer.Id, updateDefinition);
+            }
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            await _context.Trainers.DeleteOneAsync(g => g.Id == id);
+            var trng = await _context.Trainers.Find(p => p.Id == id).FirstOrDefaultAsync();
+            if (trng != null)
+            {
+                // Se a foto existir, delete-a
+                if (!string.IsNullOrEmpty(trng.Photo))
+                {
+                    string photoPath = Path.Combine("wwwroot", trng.Photo.TrimStart('/'));
+                    if (System.IO.File.Exists(photoPath))
+                    {
+                        System.IO.File.Delete(photoPath);
+                    }
+                }
+
+                // Exclui o pet do banco de dados
+                await _context.Trainers.DeleteOneAsync(p => p.Id == id);
+            }           
         }
 
         public async Task<IEnumerable<Trainer>> GetAllAsync()
@@ -46,16 +80,17 @@ namespace PCL.Infrastructure.Repositories
 
         public async Task<IEnumerable<Pet>> GetPetsByTrainerIdAsync(Guid trainerId)
         {
-            var trainer = await _context.Trainers.Find(t => t.Id == trainerId).FirstOrDefaultAsync();
+            var appointments = await _context.Appointments
+                .Find(a => a.TrainerId == trainerId)
+                .ToListAsync();
 
-            if (trainer == null)
-            {               
-                return new List<Pet>();
-            }
+            // Extrai os IDs dos pets dos agendamentos
+            var petIds = appointments.Select(a => a.PetId);
 
-            var appointmentIds = trainer.AppointmentIds;
-
-            var pets = await _context.Pets.Find(p => appointmentIds.Contains(p.Id)).ToListAsync();
+            // Consulta os pets com base nos IDs obtidos
+            var pets = await _context.Pets
+                .Find(p => petIds.Contains(p.Id))
+                .ToListAsync();
 
             return pets;
         }

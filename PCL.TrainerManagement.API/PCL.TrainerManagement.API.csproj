@@ -15,4 +15,8 @@
     <ProjectReference Include="..\PCL.Infrastructure\PCL.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\trainer\" />
+  </ItemGroup>
+
 </Project>

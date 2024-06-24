@@ -16,6 +16,7 @@ namespace PCL.Domain.Entities
         public string Name { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-        public List<Guid> AppointmentIds { get; set; } = new List<Guid>();
+        public string? Photo {  get; set; }
+        public List<Appointment>? Appointments { get; set; }
     }
 }

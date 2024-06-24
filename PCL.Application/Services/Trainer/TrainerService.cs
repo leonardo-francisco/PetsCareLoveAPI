@@ -25,6 +25,7 @@ namespace PCL.Application.Services.Trainer
         {
             var trng = _mapper.Map<PCL.Domain.Entities.Trainer>(trainerDto);
             await _trainerRepository.CreateAsync(trng);
+            trainerDto.Id = trng.Id;
         }
 
         public async Task DeleteTrainerAsync(Guid id)

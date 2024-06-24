@@ -18,6 +18,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ImageHelper>();
+builder.Services.AddSingleton<PhotoTransfer>();
 
 // Configurar MongoDbSettings e MongoDbContext
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoConnectionStrings"));
@@ -57,7 +58,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
