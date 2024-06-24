@@ -15,11 +15,13 @@ namespace PCL.Infrastructure.Repositories
     {
         private readonly PetCareContext _context;
         private readonly ImageHelper _imageHelper;
+        private readonly PhotoTransfer _photoTransfer;
 
-        public PetRepository(PetCareContext context, ImageHelper imageHelper)
+        public PetRepository(PetCareContext context, ImageHelper imageHelper, PhotoTransfer photoTransfer)
         {
             _context = context;
             _imageHelper = imageHelper;
+            _photoTransfer = photoTransfer;
         }
 
         public async Task CreateAsync(Pet pet)
@@ -36,6 +38,9 @@ namespace PCL.Infrastructure.Repositories
 
                 string imagePath = Path.Combine(directoryPath, $"{pet.Id}.jpg");
 
+                // Get Photo from MVC Application
+                var photoBytes = _photoTransfer.GetPhotoAsync(pet.Photo);
+
                 await _imageHelper.DownloadAndSaveImageAsync(pet.Photo, imagePath);
 
                 // Update the Photo property to the new local path
@@ -43,39 +48,31 @@ namespace PCL.Infrastructure.Repositories
                 var updateDefinition = Builders<Pet>.Update.Set(o => o.Photo, pet.Photo);
                 await _context.Pets.UpdateOneAsync(o => o.Id == pet.Id, updateDefinition);
             }
+            
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            await _context.Pets.DeleteOneAsync(p => p.Id == id);
+            var pet = await _context.Pets.Find(p => p.Id == id).FirstOrDefaultAsync();
+            if (pet != null)
+            {
+                // Se a foto existir, delete-a
+                if (!string.IsNullOrEmpty(pet.Photo))
+                {
+                    string photoPath = Path.Combine("wwwroot", pet.Photo.TrimStart('/'));
+                    if (System.IO.File.Exists(photoPath))
+                    {
+                        System.IO.File.Delete(photoPath);
+                    }
+                }
+
+                // Exclui o pet do banco de dados
+                await _context.Pets.DeleteOneAsync(p => p.Id == id);
+            }
         }
 
         public async Task<IEnumerable<Pet>> GetAllAsync()
-        {
-            //var pets = await _context.Pets.Aggregate()
-            //// Join with Breeds collection
-            //.Lookup<Pet, Breed, Pet>(
-            //    _context.Breeds,
-            //    pet => pet.BreedId,
-            //    breed => breed.Id,
-            //    pet => pet.Breed)
-            //.Unwind<Pet, Pet>(pet => pet.Breed)
-            //// Join with TypeAnimals collection
-            //.Lookup<Pet, TypeAnimal, Pet>(
-            //    _context.TypeAnimals,
-            //    pet => pet.Breed.TypeAnimalId,
-            //    typeAnimal => typeAnimal.Id,
-            //    pet => pet.Breed.TypeAnimal)
-            //.Unwind<Pet, Pet>(pet => pet.Breed.TypeAnimal)
-            //// Join with Genders collection
-            //.Lookup<Pet, Gender, Pet>(
-            //    _context.Genders,
-            //    pet => pet.GenderId,
-            //    gender => gender.Id,
-            //    pet => pet.Gender)
-            //.Unwind<Pet, Pet>(pet => pet.Gender)
-            //.ToListAsync();
-
+        {           
             var pets = await _context.Pets.Find(_ => true).ToListAsync();
 
             foreach (var item in pets)

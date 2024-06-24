@@ -24,6 +24,7 @@ namespace PCL.Application.Services.Pet
         {
             var pet = _mapper.Map<PCL.Domain.Entities.Pet>(petDto);
             await _petRepository.CreateAsync(pet);
+            petDto.Id = pet.Id;
         }
 
         public async Task DeletePetAsync(Guid id)

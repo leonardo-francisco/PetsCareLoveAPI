@@ -22,6 +22,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ImageHelper>();
+builder.Services.AddSingleton<PhotoTransfer>();
 
 // Configurar MongoDbSettings e MongoDbContext
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoConnectionStrings"));

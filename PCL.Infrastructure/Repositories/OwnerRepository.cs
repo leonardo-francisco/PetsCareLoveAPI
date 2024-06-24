@@ -44,7 +44,22 @@ namespace PCL.Infrastructure.Repositories
 
         public async Task DeleteAsync(Guid id)
         {
-            await _context.Owners.DeleteOneAsync(owner => owner.Id == id);
+            var owner = await _context.Owners.Find(p => p.Id == id).FirstOrDefaultAsync();
+            if (owner != null)
+            {
+                // Se a foto existir, delete-a
+                if (!string.IsNullOrEmpty(owner.Photo))
+                {
+                    string photoPath = Path.Combine("wwwroot", owner.Photo.TrimStart('/'));
+                    if (System.IO.File.Exists(photoPath))
+                    {
+                        System.IO.File.Delete(photoPath);
+                    }
+                }
+
+                // Exclui o pet do banco de dados
+                await _context.Owners.DeleteOneAsync(p => p.Id == id);
+            }           
         }
 
         public async Task<IEnumerable<Owner>> GetAllAsync()

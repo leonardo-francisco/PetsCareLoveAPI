@@ -25,6 +25,7 @@ namespace PCL.Application.Services.Owner
         {
             var owner = _mapper.Map<PCL.Domain.Entities.Owner>(ownerDto);
             await _ownerRepository.AddAsync(owner);
+            ownerDto.Id = owner.Id;
         }
 
         public async Task DeleteOwnerAsync(Guid id)

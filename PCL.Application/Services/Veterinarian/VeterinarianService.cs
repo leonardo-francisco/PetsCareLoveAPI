@@ -25,6 +25,7 @@ namespace PCL.Application.Services.Veterinarian
         {
             var vet = _mapper.Map<PCL.Domain.Entities.Veterinarian>(vetDto);
             await _veterinarianRepository.CreateVeterinarianAsync(vet);
+            vetDto.Id = vet.Id;
         }
 
         public async Task DeleteVeterinarianAsync(Guid id)

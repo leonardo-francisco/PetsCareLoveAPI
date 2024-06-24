@@ -44,7 +44,22 @@ namespace PCL.Infrastructure.Repositories
 
         public async Task DeleteVeterinarianAsync(Guid id)
         {
-            await _context.Veterinarians.DeleteOneAsync(p => p.Id == id);
+            var vet = await _context.Veterinarians.Find(p => p.Id == id).FirstOrDefaultAsync();
+            if (vet != null)
+            {
+                // Se a foto existir, delete-a
+                if (!string.IsNullOrEmpty(vet.Photo))
+                {
+                    string photoPath = Path.Combine("wwwroot", vet.Photo.TrimStart('/'));
+                    if (System.IO.File.Exists(photoPath))
+                    {
+                        System.IO.File.Delete(photoPath);
+                    }
+                }
+
+                // Exclui o pet do banco de dados
+                await _context.Veterinarians.DeleteOneAsync(p => p.Id == id);
+            }           
         }
 
         public async Task<IEnumerable<Veterinarian>> GetAllAsync()

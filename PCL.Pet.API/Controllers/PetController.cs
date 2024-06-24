@@ -60,7 +60,7 @@ namespace PCL.Pet.API.Controllers
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePet(Guid id)
-        {
+        {         
             await _petService.DeletePetAsync(id);
             return NoContent();
         }
