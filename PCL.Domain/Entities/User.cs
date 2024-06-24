@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace PCL.Domain.Entities
@@ -18,7 +19,11 @@ namespace PCL.Domain.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         [BsonRepresentation(BsonType.String)]
-        public Guid Role { get; set; }
-        
+        public Guid RoleId { get; set; }
+
+        [JsonIgnore]
+        [BsonIgnore]
+        public Role Role { get; set; }
+
     }
 }

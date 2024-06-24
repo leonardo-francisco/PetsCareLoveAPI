@@ -1,5 +1,4 @@
 ﻿using MongoDB.Driver;
-using NLog.Filters;
 using PCL.Domain.Entities;
 using PCL.Domain.Interfaces;
 using PCL.Infrastructure.Persistence;

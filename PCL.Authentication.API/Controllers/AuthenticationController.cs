@@ -34,11 +34,11 @@ namespace PCL.Authentication.API.Controllers
 
             if (userDetails == null)
             {
-                return NotFound("Usuario não registrado no sistema");
+                return NotFound(new { message = "Usuario não registrado no sistema" });
             }                 
             else if(userDetails != null && !_passwordHasher.VerifyPassword(userDetails.Password, model.Password))
             {
-                return NotFound("Usuario ou senha incorreta");
+                return NotFound(new { message = "Usuario ou senha incorreta" });
             }
 
             // Gera o Token
@@ -63,7 +63,7 @@ namespace PCL.Authentication.API.Controllers
                 Name = userDto.Name,
                 Email = userDto.Email,
                 Password = _passwordHasher.HashPassword(userDto.Password),
-                Role = userDto.Role
+                RoleId = userDto.RoleId
             };
             await _userService.CreateUserAsync(user);
 
@@ -81,11 +81,11 @@ namespace PCL.Authentication.API.Controllers
         {
             var user = await _userService.GetUserByEmailAsync(model.Email);
 
-            if (user == null) return NotFound("Usuario não registrado no sistema");
+            if (user == null) return NotFound(new { message = "Usuario não registrado no sistema" });
                       
             await _userService.UpdatePasswordAsync(user.Id, model.Password);
 
-            return Ok("Senha alterada com sucesso");
+            return Ok(new { message = "Senha alterada com sucesso" });
         }
     }
 }

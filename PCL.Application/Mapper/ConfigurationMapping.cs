@@ -57,7 +57,9 @@ namespace PCL.Application.Mapper
 
             CreateMap<Role, RoleDto>().ReverseMap();
 
-            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.Name))
+                .ReverseMap();
 
             CreateMap<Category, CategoryDto>().ReverseMap();
 

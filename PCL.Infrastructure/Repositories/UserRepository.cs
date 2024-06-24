@@ -34,17 +34,40 @@ namespace PCL.Infrastructure.Repositories
 
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _context.Users.Find(_ => true).ToListAsync();
+            var users =  await _context.Users.Find(_ => true).ToListAsync();
+
+            foreach (var item in users)
+            {
+                var role = await _context.Roles.Find(o => o.Id == item.RoleId).FirstOrDefaultAsync();
+                item.Role = role;
+            }
+
+            return users;
         }
 
         public async Task<User> GetByIdAsync(Guid id)
         {
-            return await _context.Users.Find(g => g.Id == id).FirstOrDefaultAsync();
+            var user =  await _context.Users.Find(g => g.Id == id).FirstOrDefaultAsync();
+
+            if (user != null)
+            {
+                var role = await _context.Roles.Find(o => o.Id == user.RoleId).FirstOrDefaultAsync();
+                user.Role = role;
+            }
+
+            return user;
         }
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            var user = await _context.Users.Find(p => p.Email == email).FirstOrDefaultAsync();           
+            var user = await _context.Users.Find(p => p.Email == email).FirstOrDefaultAsync();
+
+            if (user != null)
+            {
+                var role = await _context.Roles.Find(o => o.Id == user.RoleId).FirstOrDefaultAsync();
+                user.Role = role;
+            }
+
             return user;
         }
 
